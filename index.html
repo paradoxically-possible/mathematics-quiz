@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Kuis Matematika (updated)</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Roboto', sans-serif;
+      background: #f0f2f5;
+      padding: 1rem;
+    }
+    /* Custom styling untuk tombol-tombol checkbox */
+    .operation-btn {
+      min-width: 120px;
+    }
+    .operation-btn:hover {
+      transform: scale(1.02);
+      transition: transform 0.2s;
+    }
+    /* Pastikan card memiliki margin bawah untuk spasi antar elemen */
+    .card {
+      margin-bottom: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Tampilan Pengaturan -->
+    <div class="card" id="settings-container">
+      <div class="card-body">
+        <h1 class="card-title text-center mb-4">Kuis Matematika</h1>
+        
+        <!-- Pilihan Operasi dengan toggle button Bootstrap -->
+        <div class="mb-3">
+          <label class="form-label">Pilih Operasi:</label>
+          <div class="d-flex flex-wrap gap-2" id="operationButtons">
+            <!-- Gunakan btn-check dengan label berkelas btn dan tambahkan kelas custom "operation-btn" -->
+            <input type="checkbox" class="btn-check" id="checkbox-addition" name="operation" value="addition" autocomplete="off" checked>
+            <label class="btn btn-outline-primary operation-btn" for="checkbox-addition">Penjumlahan</label>
+
+            <input type="checkbox" class="btn-check" id="checkbox-subtraction" name="operation" value="subtraction" autocomplete="off">
+            <label class="btn btn-outline-primary operation-btn" for="checkbox-subtraction">Pengurangan</label>
+
+            <input type="checkbox" class="btn-check" id="checkbox-multiplication" name="operation" value="multiplication" autocomplete="off">
+            <label class="btn btn-outline-primary operation-btn" for="checkbox-multiplication">Perkalian</label>
+
+            <input type="checkbox" class="btn-check" id="checkbox-division" name="operation" value="division" autocomplete="off">
+            <label class="btn btn-outline-primary operation-btn" for="checkbox-division">Pembagian</label>
+
+            <input type="checkbox" class="btn-check" id="checkbox-exponentiation" name="operation" value="exponentiation" autocomplete="off">
+            <label class="btn btn-outline-primary operation-btn" for="checkbox-exponentiation">Pangkat</label>
+
+            <input type="checkbox" class="btn-check" id="checkbox-percentage" name="operation" value="percentage" autocomplete="off">
+            <label class="btn btn-outline-primary operation-btn" for="checkbox-percentage">Persen</label>
+          </div>
+        </div>
+        <!-- Input nilai pangkat (hanya muncul jika opsi Pangkat dicentang) -->
+        <div class="mb-3" id="exponentInputContainer" style="display: none;">
+          <label for="exponentValue" class="form-label">Nilai Pangkat:</label>
+          <input type="number" class="form-control" id="exponentValue" placeholder="Masukkan nilai pangkat yang diinginkan" value="2">
+        </div>
+        <!-- Batas Angka Kiri -->
+        <div class="mb-3">
+          <label for="leftMax" class="form-label">Batas Angka Kiri (0 sampai ...):</label>
+          <input type="number" class="form-control" id="leftMax" placeholder="Masukkan angka maksimal sisi kiri" value="10" min="0">
+        </div>
+        <!-- Batas Angka Kanan -->
+        <div class="mb-3">
+          <label for="rightMax" class="form-label">Batas Angka Kanan (0 sampai ...):</label>
+          <input type="number" class="form-control" id="rightMax" placeholder="Masukkan angka maksimal sisi kanan" value="10" min="0">
+        </div>
+        <!-- Jumlah Pertanyaan -->
+        <div class="mb-3">
+          <label for="numQuestions" class="form-label">Jumlah Pertanyaan:</label>
+          <input type="number" class="form-control" id="numQuestions" placeholder="Masukkan jumlah pertanyaan" value="10" min="1">
+        </div>
+        <button id="startButton" class="btn btn-primary w-100">Mulai Latihan</button>
+      </div>
+    </div>
+
+    <!-- Tampilan Quiz -->
+    <div class="card" id="quiz-container" style="display:none;">
+      <div class="card-body text-center">
+        <h2 id="questionText" class="card-title mb-4"></h2>
+        <!-- Input untuk operasi non pembagian -->
+        <div id="standardInput" class="mb-3">
+          <input type="text" class="form-control" id="answerInput" placeholder="Masukkan jawaban">
+        </div>
+        <!-- Input khusus untuk soal pembagian -->
+        <div id="divisionInputs" style="display:none;">
+          <div class="mb-3">
+            <label for="quotientInput" class="form-label">Quotient:</label>
+            <input type="number" class="form-control" id="quotientInput" placeholder="Masukkan hasil pembagian (quotient)">
+          </div>
+          <div class="mb-3">
+            <label for="remainderInput" class="form-label">Remainder:</label>
+            <input type="number" class="form-control" id="remainderInput" placeholder="Masukkan sisa (remainder)">
+          </div>
+        </div>
+        <button id="submitAnswerButton" class="btn btn-success w-100">Submit Jawaban</button>
+        <p id="feedback" class="mt-3 text-muted"></p>
+        <p id="progress" class="mt-3 text-muted"></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Hasil (Bootstrap Modal) -->
+  <div class="modal fade" id="resultModal" tabindex="-1" aria-labelledby="resultModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="resultModalLabel">Congratulations! 🥳</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p id="modalMessage"></p>
+        </div>
+        <div class="modal-footer">
+          <button id="closeModalButton" type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS Bundle (dengan Popper) -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Ambil elemen DOM
+    const settingsContainer = document.getElementById('settings-container');
+    const quizContainer = document.getElementById('quiz-container');
+    const modalMessage = document.getElementById('modalMessage');
+
+    const leftMaxInput = document.getElementById('leftMax');
+    const rightMaxInput = document.getElementById('rightMax');
+    const numQuestionsInput = document.getElementById('numQuestions');
+    const startButton = document.getElementById('startButton');
+
+    const questionText = document.getElementById('questionText');
+    const answerInput = document.getElementById('answerInput');
+    const divisionInputs = document.getElementById('divisionInputs');
+    const quotientInput = document.getElementById('quotientInput');
+    const remainderInput = document.getElementById('remainderInput');
+    const submitAnswerButton = document.getElementById('submitAnswerButton');
+    const feedbackText = document.getElementById('feedback');
+    const progressText = document.getElementById('progress');
+
+    // Elemen untuk input pangkat
+    const exponentiationCheckbox = document.getElementById('checkbox-exponentiation');
+    const exponentInputContainer = document.getElementById('exponentInputContainer');
+    const exponentValueInput = document.getElementById('exponentValue');
+
+    // Tampilkan atau sembunyikan input nilai pangkat jika opsi Pangkat dicentang
+    exponentiationCheckbox.addEventListener('change', function(){
+      exponentInputContainer.style.display = exponentiationCheckbox.checked ? 'block' : 'none';
+    });
+
+    // Variabel global untuk mengelola quiz
+    let currentQuestion = 0;
+    let totalQuestions = 0;
+    let score = 0;
+    let leftMax = 10;
+    let rightMax = 10;
+    let questions = [];
+    let selectedOperations = [];
+    let startTime = 0;
+
+    // Fungsi menghasilkan angka acak antara 0 dan max (inklusif)
+    function randomNumber(max) {
+      return Math.floor(Math.random() * (parseInt(max) + 1));
+    }
+
+    // Untuk pembagian, pastikan angka penyebut tidak nol
+    function randomNonZeroNumber(max) {
+      let num = randomNumber(max);
+      while (num === 0 && max > 0) {
+        num = randomNumber(max);
+      }
+      return num;
+    }
+
+    // Fungsi menghasilkan satu pertanyaan berdasarkan operasi yang dipilih
+    function generateQuestion() {
+      // Pilih salah satu operasi secara acak dari selectedOperations
+      const op = selectedOperations[Math.floor(Math.random() * selectedOperations.length)];
+      let left, right, question, answer;
+      switch(op) {
+        case 'addition':
+          left = randomNumber(leftMax);
+          right = randomNumber(rightMax);
+          question = `${left} + ${right} = ?`;
+          answer = left + right;
+          break;
+        case 'subtraction':
+          left = randomNumber(leftMax);
+          right = randomNumber(rightMax);
+          question = `${left} - ${right} = ?`;
+          answer = left - right;
+          break;
+        case 'multiplication':
+          left = randomNumber(leftMax);
+          right = randomNumber(rightMax);
+          question = `${left} × ${right} = ?`;
+          answer = left * right;
+          break;
+        case 'division':
+          right = randomNonZeroNumber(rightMax);
+          left = randomNumber(leftMax);
+          let quotient = Math.floor(left / right);
+          let remainder = left % right;
+          question = `${left} ÷ ${right} = ?`;
+          answer = { quotient: quotient, remainder: remainder };
+          break;
+        case 'exponentiation':
+          left = randomNumber(leftMax);
+          let exponentValue = parseInt(exponentValueInput.value) || 2;
+          question = `${left} ^ ${exponentValue} = ?`;
+          answer = Math.pow(left, exponentValue);
+          break;
+        case 'percentage':
+          left = randomNumber(leftMax);
+          right = randomNumber(rightMax);
+          question = `Hitung ${left}% dari ${right}`;
+          answer = (left / 100) * right;
+          break;
+        default:
+          question = 'Operasi tidak dikenal';
+          answer = null;
+      }
+      return { op: op, question: question, answer: answer };
+    }
+
+    // Fungsi mulai quiz berdasarkan pengaturan user
+    function startQuiz() {
+      // Ambil operasi yang dipilih dari toggle button
+      selectedOperations = Array.from(document.querySelectorAll('input[name="operation"]:checked'))
+                                .map(cb => cb.value);
+      if (selectedOperations.length === 0) {
+        alert("Tolong pilih setidaknya satu operasi.");
+        return;
+      }
+      leftMax = parseInt(leftMaxInput.value) || 0;
+      rightMax = parseInt(rightMaxInput.value) || 0;
+      totalQuestions = parseInt(numQuestionsInput.value) || 10;
+      score = 0;
+      currentQuestion = 0;
+      questions = [];
+      startTime = Date.now();
+
+      // Hasilkan seluruh pertanyaan terlebih dahulu
+      for (let i = 0; i < totalQuestions; i++){
+        questions.push(generateQuestion());
+      }
+
+      // Tampilkan tampilan quiz dan sembunyikan pengaturan
+      settingsContainer.style.display = 'none';
+      quizContainer.style.display = 'block';
+      feedbackText.textContent = '';
+      showQuestion();
+    }
+
+    // Fungsi tampilkan pertanyaan saat ini
+    function showQuestion() {
+      if (currentQuestion < totalQuestions) {
+        const currentQ = questions[currentQuestion];
+        questionText.textContent = currentQ.question;
+        progressText.textContent = `Pertanyaan ${currentQuestion + 1} dari ${totalQuestions}`;
+        feedbackText.textContent = '';
+
+        // Jika soal pembagian, tampilkan input khusus pembagian dan sembunyikan input standar
+        if (currentQ.op === 'division') {
+          document.getElementById('standardInput').style.display = 'none';
+          divisionInputs.style.display = 'block';
+          quotientInput.value = '';
+          remainderInput.value = '';
+          quotientInput.focus();
+        } else {
+          divisionInputs.style.display = 'none';
+          document.getElementById('standardInput').style.display = 'block';
+          answerInput.value = '';
+          answerInput.focus();
+        }
+      } else {
+        endQuiz();
+      }
+    }
+
+    // Fungsi akhiri quiz dan tampilkan hasil pada modal
+    function endQuiz() {
+      quizContainer.style.display = 'none';
+      const elapsedTime = ((Date.now() - startTime) / 1000).toFixed(1);
+      const accuracy = ((score / totalQuestions) * 100).toFixed(1);
+      modalMessage.textContent = `You completed the quiz in ${elapsedTime}s! With an accuracy of ${accuracy}%.`;
+      const resultModal = new bootstrap.Modal(document.getElementById('resultModal'));
+      resultModal.show();
+    }
+
+    // Event listener untuk submit jawaban
+    submitAnswerButton.addEventListener('click', () => {
+      const currentQ = questions[currentQuestion];
+      if (currentQ.op === 'division') {
+        const userQuotient = parseInt(quotientInput.value, 10);
+        const userRemainder = parseInt(remainderInput.value, 10);
+        if (isNaN(userQuotient) || isNaN(userRemainder)) {
+          feedbackText.textContent = 'Tolong masukkan angka yang valid untuk quotient dan remainder!';
+          return;
+        }
+        if (userQuotient === currentQ.answer.quotient && userRemainder === currentQ.answer.remainder) {
+          feedbackText.textContent = 'Benar!';
+          score++;
+        } else {
+          feedbackText.textContent = `Salah. Jawaban yang benar adalah ${currentQ.answer.quotient} dengan sisa ${currentQ.answer.remainder}.`;
+        }
+      } else {
+        const userAnswer = parseFloat(answerInput.value);
+        if (isNaN(userAnswer)) {
+          feedbackText.textContent = 'Tolong masukkan angka yang valid!';
+          return;
+        }
+        if (Math.abs(userAnswer - currentQ.answer) < 0.001) {
+          feedbackText.textContent = 'Benar!';
+          score++;
+        } else {
+          feedbackText.textContent = `Salah. Jawaban yang benar adalah ${currentQ.answer}.`;
+        }
+      }
+      currentQuestion++;
+      setTimeout(showQuestion, 1500);
+    });
+
+    // Event listener untuk memulai quiz
+    startButton.addEventListener('click', startQuiz);
+
+    // Mendukung submit dengan tombol Enter
+    answerInput.addEventListener('keyup', function(event) {
+      if (event.key === 'Enter') {
+        submitAnswerButton.click();
+      }
+    });
+    quotientInput.addEventListener('keyup', function(event) {
+      if (event.key === 'Enter') {
+        remainderInput.focus();
+      }
+    });
+    remainderInput.addEventListener('keyup', function(event) {
+      if (event.key === 'Enter') {
+        submitAnswerButton.click();
+      }
+    });
+  </script>
+</body>
+</html>
