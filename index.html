@@ -2,42 +2,90 @@
 <html lang="en" data-bs-theme="light">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Math Quiz</title>
+  <!-- Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
   <!-- Bootstrap CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <!-- Google Font: Poppins -->
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
   <style>
+    /* Base Styles */
     body {
       font-family: 'Poppins', sans-serif;
       background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-      padding: 1rem;
-      min-height: 100vh;
       color: #333;
+      min-height: 100vh;
+      margin: 0;
+      padding: 2rem 0;
+      transition: background 0.5s ease, color 0.5s ease;
     }
-    .container {
-      max-width: 600px;
-      margin: auto;
-    }
-    .card {
+    h1, h2, h3, h4, h5, h6 { font-weight: 600; }
+    p { font-weight: 300; }
+
+    /* Container & Card Styles */
+    .quiz-container,
+    #modeSelection {
       background-color: #fff;
       border-radius: 15px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      padding: 2rem;
+      margin-bottom: 2rem;
+      transition: background-color 0.5s ease, box-shadow 0.5s ease;
+    }
+    #modeSelection { text-align: center; }
+    #modeSelection h1 { margin-bottom: 1.5rem; }
+
+    /* Form & Button Styles */
+    .form-select, .btn-primary, .btn-warning, #userAnswer, #submitBtn {
+      border-radius: 50px;
+      font-size: 1.1rem;
+      padding: 0.75rem 1.25rem;
+      transition: background-color 0.3s ease, border 0.3s ease;
+    }
+    .btn-primary {
+      background-color: #4facfe;
+      border: none;
+    }
+    .btn-primary:hover { background-color: #00f2fe; }
+    
+    /* Quiz Section Styles */
+    #quizSection .timer {
+      font-size: 1.25rem;
+      font-weight: 600;
+    }
+    .question-card {
+      border-left: 6px solid #4facfe;
       padding: 2rem;
       margin-bottom: 1.5rem;
+      background: #f7f9fc;
+      border-radius: 10px;
     }
-    .btn-check:checked + .btn {
-      background-color: #4facfe;
-      color: #fff;
+    #userAnswer {
+      border: 1px solid #ddd;
+      padding: 1rem;
+      font-size: 1.1rem;
     }
-    .operation-btn {
-      min-width: 120px;
+    #submitBtn {
+      background-color: #00f2fe;
+      border: none;
     }
-    .operation-btn:hover {
-      transform: scale(1.02);
-      transition: transform 0.2s;
+    #submitBtn:hover { background-color: #4facfe; }
+    .btn-warning {
+      background-color: #f0ad4e;
+      border: none;
     }
+    .btn-warning:hover {
+      background-color: #ec971f;
+    }
+
+    /* Results Section Styles */
+    #resultsSection h2 { margin-bottom: 1.5rem; }
+    #finalStats p { font-size: 1.1rem; margin: 0.5rem 0; }
+    table { font-size: 0.95rem; }
+    th, td { text-align: center; vertical-align: middle; }
+    .correct-answer { background-color: #d4edda !important; }
+    .wrong-answer { background-color: #f8d7da !important; }
+
     /* Theme Toggle Button */
     .theme-toggle {
       position: fixed;
@@ -56,392 +104,409 @@
       transition: transform 0.3s ease;
     }
     .theme-toggle button:hover { transform: scale(1.1); }
-    /* Results Section Styles */
-    #resultsSection table {
-      width: 100%;
+
+    /* Dark Mode Overrides */
+    [data-bs-theme="dark"] body {
+      background: linear-gradient(135deg, #232526, #414345);
+      color: #e0e0e0;
     }
-    #resultsSection th, #resultsSection td {
-      text-align: center;
-      vertical-align: middle;
+    [data-bs-theme="dark"] .quiz-container,
+    [data-bs-theme="dark"] #modeSelection {
+      background-color: #2c2c2c;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
     }
-    .correct-answer {
-      background-color: #d4edda;
+    [data-bs-theme="dark"] .form-select,
+    [data-bs-theme="dark"] #userAnswer {
+      background-color: #444;
+      color: #e0e0e0;
+      border: 1px solid #555;
     }
-    .wrong-answer {
-      background-color: #f8d7da;
+    [data-bs-theme="dark"] .btn-primary,
+    [data-bs-theme="dark"] #submitBtn,
+    [data-bs-theme="dark"] .btn-warning {
+      background-color: #5cb85c;
+      border: none;
     }
+    [data-bs-theme="dark"] .btn-primary:hover,
+    [data-bs-theme="dark"] #submitBtn:hover,
+    [data-bs-theme="dark"] .btn-warning:hover {
+      background-color: #4facfe;
+    }
+    [data-bs-theme="dark"] table { color: #e0e0e0; }
+    [data-bs-theme="dark"] table thead th { background-color: #3a3a3a; }
+    [data-bs-theme="dark"] table tbody tr { background-color: #2c2c2c; }
+    [data-bs-theme="dark"] .question-card {\n      background: #3a3a3a;\n      border-left-color: #5cb85c;\n    }
   </style>
 </head>
-<body>
+<body class="py-4">
   <!-- Theme Toggle Button -->
   <div class="theme-toggle">
-    <button id="themeToggle">🌙</button>
+    <button class="btn" id="themeToggle">🌙</button>
   </div>
 
   <div class="container">
-    <!-- Quiz Settings Section -->
-    <div class="card" id="settings-container">
-      <h1 class="text-center mb-4">Math Quiz</h1>
-      <!-- Select Operations -->
-      <div class="mb-3">
-        <label class="form-label">Select Operations:</label>
-        <div class="d-flex flex-wrap gap-2" id="operationButtons">
-          <input type="checkbox" class="btn-check" id="checkbox-addition" name="operation" value="addition" autocomplete="off" checked>
-          <label class="btn btn-outline-primary operation-btn" for="checkbox-addition">Addition</label>
-
-          <input type="checkbox" class="btn-check" id="checkbox-subtraction" name="operation" value="subtraction" autocomplete="off">
-          <label class="btn btn-outline-primary operation-btn" for="checkbox-subtraction">Subtraction</label>
-
-          <input type="checkbox" class="btn-check" id="checkbox-multiplication" name="operation" value="multiplication" autocomplete="off">
-          <label class="btn btn-outline-primary operation-btn" for="checkbox-multiplication">Multiplication</label>
-
-          <input type="checkbox" class="btn-check" id="checkbox-division" name="operation" value="division" autocomplete="off">
-          <label class="btn btn-outline-primary operation-btn" for="checkbox-division">Division</label>
-
-          <input type="checkbox" class="btn-check" id="checkbox-exponentiation" name="operation" value="exponentiation" autocomplete="off">
-          <label class="btn btn-outline-primary operation-btn" for="checkbox-exponentiation">Exponentiation</label>
-
-          <input type="checkbox" class="btn-check" id="checkbox-percentage" name="operation" value="percentage" autocomplete="off">
-          <label class="btn btn-outline-primary operation-btn" for="checkbox-percentage">Percentage</label>
+    <!-- Mode Selection Section -->
+    <section id="modeSelection" class="mb-5">
+      <h1 class="display-4">Math Quiz</h1>
+      <div class="row justify-content-center g-3">
+        <!-- Mode Selection -->
+        <div class="col-md-3">
+          <select class="form-select form-select-lg" id="mode">
+            <option value="preparation">Preparation</option>
+            <option value="half-full">Half-Full</option>
+            <option value="full">Full</option>
+          </select>
+        </div>
+        <!-- Difficulty Level Selection -->
+        <div class="col-md-3">
+          <select class="form-select form-select-lg" id="difficulty">
+            <option value="easy">Easy</option>
+            <option value="medium">Medium</option>
+            <option value="hard">Hard</option>
+          </select>
+        </div>
+        <!-- Operation Selection -->
+        <div class="col-md-3">
+          <select class="form-select form-select-lg" id="operation">
+            <option value="+">Addition</option>
+            <option value="-">Subtraction</option>
+            <option value="×">Multiplication</option>
+            <option value="÷">Division</option>
+            <option value="^">Exponentiation</option>
+          </select>
         </div>
       </div>
-      <!-- Exponent Value (only shown if exponentiation is selected) -->
-      <div class="mb-3" id="exponentInputContainer" style="display: none;">
-        <label for="exponentValue" class="form-label">Exponent Value:</label>
-        <input type="number" class="form-control" id="exponentValue" placeholder="Enter desired exponent value" value="2">
+      <div class="mt-4">
+        <button class="btn btn-primary btn-lg" onclick="startNewQuiz()">Start Quiz</button>
       </div>
-      <!-- Left Number Limit -->
-      <div class="mb-3">
-        <label for="leftMax" class="form-label">Left Number Limit (0 to ...):</label>
-        <input type="number" class="form-control" id="leftMax" placeholder="Enter maximum left number" value="10" min="0">
-      </div>
-      <!-- Right Number Limit -->
-      <div class="mb-3">
-        <label for="rightMax" class="form-label">Right Number Limit (0 to ...):</label>
-        <input type="number" class="form-control" id="rightMax" placeholder="Enter maximum right number" value="10" min="0">
-      </div>
-      <!-- Number of Questions -->
-      <div class="mb-3">
-        <label for="numQuestions" class="form-label">Number of Questions:</label>
-        <input type="number" class="form-control" id="numQuestions" placeholder="Enter number of questions" value="10" min="1">
-      </div>
-      <button id="startButton" class="btn btn-primary w-100">Start Quiz</button>
-    </div>
+    </section>
 
     <!-- Quiz Section -->
-    <div class="card" id="quiz-container" style="display: none;">
-      <div class="text-center">
-        <h2 id="questionText" class="mb-4"></h2>
-        <!-- Standard Answer Input -->
-        <div id="standardInput" class="mb-3">
-          <input type="text" class="form-control" id="answerInput" placeholder="Enter your answer">
+    <section id="quizSection" style="display: none">
+      <div class="quiz-container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <h3 class="mb-0">Question</h3>
+          <div class="timer">Time: <span id="timeLeft">30</span>s</div>
         </div>
-        <!-- Division Answer Inputs -->
-        <div id="divisionInputs" style="display:none;">
-          <div class="mb-3">
-            <label for="quotientInput" class="form-label">Quotient:</label>
-            <input type="number" class="form-control" id="quotientInput" placeholder="Enter quotient">
-          </div>
-          <div class="mb-3">
-            <label for="remainderInput" class="form-label">Remainder:</label>
-            <input type="number" class="form-control" id="remainderInput" placeholder="Enter remainder">
+        <div class="question-card">
+          <h2 id="questionText" class="text-center display-1 mb-4"></h2>
+          <div class="input-group mb-3">
+            <input type="number" class="form-control form-control-lg" id="userAnswer" placeholder="Enter your answer..." step="1" autocomplete="off">
+            <button class="btn btn-success" type="button" onclick="submitAnswer()" id="submitBtn">Submit</button>
           </div>
         </div>
-        <button id="submitAnswerButton" class="btn btn-success w-100">Submit Answer</button>
-        <p id="feedback" class="mt-3 text-muted"></p>
-        <p id="progress" class="mt-3 text-muted"></p>
+        <div class="text-center">
+          <button class="btn btn-warning" onclick="finishQuiz()">Finish Quiz</button>
+        </div>
       </div>
-    </div>
+    </section>
 
     <!-- Results Section -->
-    <div class="card" id="resultsSection" style="display: none;">
-      <h2 class="text-center mb-4">Quiz Results</h2>
-      <div id="finalStats" class="mb-4"></div>
-      <div class="table-responsive">
-        <table class="table table-bordered">
-          <thead>
-            <tr>
-              <th>Question</th>
-              <th>Correct Answer</th>
-              <th>Your Answer</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody id="resultsBody"></tbody>
-        </table>
+    <section id="resultsSection" style="display: none">
+      <div class="quiz-container">
+        <h2 class="mb-4 text-center">Quiz Results</h2>
+        <!-- Final Results Summary -->
+        <div id="finalStats" class="mb-4"></div>
+        <div class="table-responsive">
+          <table class="table table-bordered">
+            <thead>
+              <tr>
+                <th>Question</th>
+                <th>Correct Answer</th>
+                <th>Your Answer</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="resultsBody"></tbody>
+          </table>
+        </div>
+        <div class="text-center mt-3">
+          <button class="btn btn-primary" onclick="location.reload()">New Quiz</button>
+        </div>
       </div>
-      <div class="text-center mt-3">
-        <button class="btn btn-primary" onclick="location.reload()">New Quiz</button>
-      </div>
-    </div>
+    </section>
   </div>
 
   <!-- Bootstrap JS Bundle -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
-    // Theme Toggle Functionality
+    /***********************
+     * THEME TOGGLE FUNCTION
+     ***********************/
     function toggleTheme() {
       const html = document.documentElement;
-      const currentTheme = html.getAttribute('data-bs-theme') || 'light';
-      const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+      const isDark = html.getAttribute('data-bs-theme') === 'dark';
+      const newTheme = isDark ? 'light' : 'dark';
       html.setAttribute('data-bs-theme', newTheme);
+      localStorage.setItem('theme', newTheme);
       document.getElementById('themeToggle').textContent = newTheme === 'dark' ? '☀️' : '🌙';
     }
     document.getElementById('themeToggle').addEventListener('click', toggleTheme);
 
-    // DOM Elements
-    const settingsContainer = document.getElementById('settings-container');
-    const quizContainer = document.getElementById('quiz-container');
-    const resultsSection = document.getElementById('resultsSection');
-    const finalStats = document.getElementById('finalStats');
-    const resultsBody = document.getElementById('resultsBody');
-    const questionText = document.getElementById('questionText');
-    const answerInput = document.getElementById('answerInput');
-    const divisionInputs = document.getElementById('divisionInputs');
-    const quotientInput = document.getElementById('quotientInput');
-    const remainderInput = document.getElementById('remainderInput');
-    const feedbackText = document.getElementById('feedback');
-    const progressText = document.getElementById('progress');
-    const startButton = document.getElementById('startButton');
-    const submitAnswerButton = document.getElementById('submitAnswerButton');
-    const leftMaxInput = document.getElementById('leftMax');
-    const rightMaxInput = document.getElementById('rightMax');
-    const numQuestionsInput = document.getElementById('numQuestions');
-    const exponentiationCheckbox = document.getElementById('checkbox-exponentiation');
-    const exponentInputContainer = document.getElementById('exponentInputContainer');
-    const exponentValueInput = document.getElementById('exponentValue');
+    /*******************************************
+     * QUIZ CONFIGURATION AND STATE
+     *******************************************/
+    const config = {
+      difficultySettings: {
+        easy: {
+          '+': { a: [1, 20], b: [1, 20] },
+          '-': { a: [10, 30], b: [1, 9] },
+          '×': { a: [1, 5], b: [1, 5] },
+          '÷': { divisor: [1, 5], quotient: [1, 5] },
+          '^': { base: [1, 3], exp: [2, 3] }
+        },
+        medium: {
+          '+': { a: [20, 100], b: [20, 100] },
+          '-': { a: [50, 150], b: [20, 50] },
+          '×': { a: [5, 10], b: [5, 10] },
+          '÷': { divisor: [2, 10], quotient: [2, 10] },
+          '^': { base: [2, 4], exp: [2, 3] }
+        },
+        hard: {
+          '+': { a: [100, 500], b: [100, 500] },
+          '-': { a: [200, 600], b: [100, 200] },
+          '×': { a: [10, 20], b: [10, 20] },
+          '÷': { divisor: [5, 20], quotient: [5, 20] },
+          '^': { base: [3, 6], exp: [3, 4] }
+        }
+      },
+      maxQuestions: 100, // default; will adjust based on mode
+      timePerQuestion: 30
+    };
 
-    // Show/Hide exponent input based on checkbox
-    exponentiationCheckbox.addEventListener('change', function(){
-      exponentInputContainer.style.display = exponentiationCheckbox.checked ? 'block' : 'none';
-    });
+    let state = {
+      isQuizActive: false,
+      currentQuestion: null,
+      timer: null,
+      timeLeft: config.timePerQuestion,
+      questions: [],
+      userAnswers: [],
+      currentOperation: '+',
+      currentDifficulty: 'easy',
+      currentMode: 'preparation', // default mode
+      startTime: null,
+      endTime: null
+    };
 
-    // Quiz variables
-    let currentQuestion = 0;
-    let totalQuestions = 0;
-    let score = 0;
-    let leftMax = 10;
-    let rightMax = 10;
-    let questions = [];
-    let selectedOperations = [];
-    let startTime = 0;
-    let userAnswers = [];
-
-    // Utility Functions
-    function randomNumber(max) {
-      return Math.floor(Math.random() * (parseInt(max) + 1));
+    /***********************************
+     * UTILITY FUNCTIONS
+     ***********************************/
+    function randomInt(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
     }
-    function randomNonZeroNumber(max) {
-      let num = randomNumber(max);
-      while(num === 0 && max > 0) {
-        num = randomNumber(max);
-      }
-      return num;
-    }
 
-    // Generate a question based on selected operations
     function generateQuestion() {
-      const op = selectedOperations[Math.floor(Math.random() * selectedOperations.length)];
-      let left, right, question, answer;
-      switch(op) {
-        case 'addition':
-          left = randomNumber(leftMax);
-          right = randomNumber(rightMax);
-          question = `${left} + ${right} = ?`;
-          answer = left + right;
+      const operation = state.currentOperation;
+      const settings = config.difficultySettings[state.currentDifficulty][operation];
+      let a, b, question, answer;
+      switch(operation) {
+        case '+':
+          a = randomInt(...settings.a);
+          b = randomInt(...settings.b);
+          answer = a + b;
+          question = `${a} + ${b}`;
           break;
-        case 'subtraction':
-          left = randomNumber(leftMax);
-          right = randomNumber(rightMax);
-          question = `${left} - ${right} = ?`;
-          answer = left - right;
+        case '-':
+          a = randomInt(...settings.a);
+          b = randomInt(...settings.b);
+          while(b >= a) b = randomInt(...settings.b);
+          answer = a - b;
+          question = `${a} - ${b}`;
           break;
-        case 'multiplication':
-          left = randomNumber(leftMax);
-          right = randomNumber(rightMax);
-          question = `${left} × ${right} = ?`;
-          answer = left * right;
+        case '×':
+          a = randomInt(...settings.a);
+          b = randomInt(...settings.b);
+          answer = a * b;
+          question = `${a} × ${b}`;
           break;
-        case 'division':
-          right = randomNonZeroNumber(rightMax);
-          left = randomNumber(leftMax);
-          let quotient = Math.floor(left / right);
-          let remainder = left % right;
-          question = `${left} ÷ ${right} = ?`;
-          answer = { quotient: quotient, remainder: remainder };
+        case '÷':
+          const quotient = randomInt(...settings.quotient);
+          b = randomInt(...settings.divisor);
+          a = b * quotient;
+          question = `${a} ÷ ${b}`;
+          answer = quotient;
           break;
-        case 'exponentiation':
-          left = randomNumber(leftMax);
-          let exponentValue = parseInt(exponentValueInput.value) || 2;
-          question = `${left} ^ ${exponentValue} = ?`;
-          answer = Math.pow(left, exponentValue);
-          break;
-        case 'percentage':
-          left = randomNumber(leftMax);
-          right = randomNumber(rightMax);
-          question = `Calculate ${left}% of ${right}`;
-          answer = (left / 100) * right;
+        case '^':
+          a = randomInt(...settings.base);
+          b = randomInt(...settings.exp);
+          answer = Math.pow(a, b);
+          question = `${a}^${b}`;
           break;
         default:
-          question = 'Unknown Operation';
-          answer = null;
+          console.error('Unknown operation:', operation);
       }
-      return { op, question, answer };
+      return { question, answer };
     }
 
-    // Start Quiz
-    function startQuiz() {
-      selectedOperations = Array.from(document.querySelectorAll('input[name="operation"]:checked'))
-                                .map(cb => cb.value);
-      if(selectedOperations.length === 0) {
-        alert("Please select at least one operation.");
+    /***********************************
+     * QUIZ CONTROL FUNCTIONS
+     ***********************************/
+    function startNewQuiz() {
+      state.isQuizActive = true;
+      state.currentMode = document.getElementById('mode').value;
+      state.currentDifficulty = document.getElementById('difficulty').value;
+      state.currentOperation = document.getElementById('operation').value;
+      
+      if(state.currentMode === 'preparation') {
+        config.maxQuestions = 100;
+      } else if(state.currentMode === 'half-full') {
+        config.maxQuestions = 200;
+      } else if(state.currentMode === 'full') {
+        config.maxQuestions = 300;
+      }
+      
+      state.questions = [];
+      state.userAnswers = [];
+      state.startTime = new Date();
+      
+      document.getElementById('modeSelection').style.display = 'none';
+      document.getElementById('quizSection').style.display = 'block';
+      document.getElementById('resultsSection').style.display = 'none';
+      
+      enableInput();
+      nextQuestion();
+    }
+
+    function nextQuestion() {
+      if (!state.isQuizActive || state.questions.length >= config.maxQuestions) {
+        finishQuiz();
         return;
       }
-      leftMax = parseInt(leftMaxInput.value) || 0;
-      rightMax = parseInt(rightMaxInput.value) || 0;
-      totalQuestions = parseInt(numQuestionsInput.value) || 10;
-      score = 0;
-      currentQuestion = 0;
-      questions = [];
-      userAnswers = [];
-      startTime = Date.now();
-
-      // Generate questions
-      for(let i = 0; i < totalQuestions; i++){
-        questions.push(generateQuestion());
-      }
-
-      settingsContainer.style.display = 'none';
-      quizContainer.style.display = 'block';
-      feedbackText.textContent = '';
-      showQuestion();
+      state.currentQuestion = generateQuestion();
+      state.questions.push(state.currentQuestion);
+      
+      document.getElementById('questionText').textContent = state.currentQuestion.question;
+      document.getElementById('userAnswer').value = '';
+      document.getElementById('userAnswer').focus();
+      
+      startTimer();
     }
 
-    // Display current question
-    function showQuestion() {
-      if(currentQuestion < totalQuestions) {
-        const currentQ = questions[currentQuestion];
-        questionText.textContent = currentQ.question;
-        progressText.textContent = `Question ${currentQuestion + 1} of ${totalQuestions}`;
-        feedbackText.textContent = '';
-
-        if(currentQ.op === 'division') {
-          document.getElementById('standardInput').style.display = 'none';
-          divisionInputs.style.display = 'block';
-          quotientInput.value = '';
-          remainderInput.value = '';
-          quotientInput.focus();
-        } else {
-          divisionInputs.style.display = 'none';
-          document.getElementById('standardInput').style.display = 'block';
-          answerInput.value = '';
-          answerInput.focus();
-        }
-      } else {
-        endQuiz();
-      }
+    function startTimer() {
+      clearInterval(state.timer);
+      state.timeLeft = config.timePerQuestion;
+      document.getElementById('timeLeft').textContent = state.timeLeft;
+      state.timer = setInterval(() => {
+        if (!state.isQuizActive) return;
+        state.timeLeft--;
+        document.getElementById('timeLeft').textContent = state.timeLeft;
+        if (state.timeLeft <= 0) { handleTimeout(); }
+      }, 1000);
     }
 
-    // End Quiz and show results
-    function endQuiz() {
-      quizContainer.style.display = 'none';
-      const elapsedTime = ((Date.now() - startTime) / 1000).toFixed(1);
-      const accuracy = ((score / totalQuestions) * 100).toFixed(1);
-      
-      // Build summary statistics
-      finalStats.innerHTML = `
-        <p>You completed the quiz in ${elapsedTime}s with an accuracy of ${accuracy}%.</p>
-      `;
-      
-      // Build results table
-      resultsBody.innerHTML = "";
-      questions.forEach((q, index) => {
-        let userAns = userAnswers[index] !== undefined ? userAnswers[index] : "Not Answered";
-        let correct, status, displayAnswer;
-        if(q.op === 'division') {
-          if(typeof userAns === "object" && userAns !== null &&
-             userAns.quotient === q.answer.quotient && userAns.remainder === q.answer.remainder) {
-            correct = true;
-            status = '✅ Correct';
-          } else {
-            correct = false;
-            status = '❌ Incorrect';
-          }
-          displayAnswer = (typeof userAns === "object" && userAns !== null) ?
-                          `Quotient: ${userAns.quotient}, Remainder: ${userAns.remainder}` : userAns;
-        } else {
-          if(Math.abs(userAns - q.answer) < 0.001) {
-            correct = true;
-            status = '✅ Correct';
-          } else {
-            correct = false;
-            status = '❌ Incorrect';
-          }
-          displayAnswer = userAns;
-        }
-        const row = document.createElement('tr');
-        row.className = correct ? 'correct-answer' : 'wrong-answer';
-        row.innerHTML = `<td>${q.question}</td><td>${q.answer}</td><td>${displayAnswer}</td><td>${status}</td>`;
-        resultsBody.appendChild(row);
+    function handleTimeout() {
+      if (!state.isQuizActive) return;
+      state.userAnswers.push(null);
+      document.getElementById('userAnswer').value = '';
+      if (state.questions.length < config.maxQuestions) {
+        nextQuestion();
+      } else { finishQuiz(); }
+    }
+
+    function submitAnswer() {
+      if (!state.isQuizActive) return;
+      const input = document.getElementById('userAnswer');
+      const answer = parseInt(input.value);
+      disableInput();
+      clearInterval(state.timer);
+      state.userAnswers.push(isNaN(answer) ? null : answer);
+      setTimeout(() => {
+        if (state.questions.length < config.maxQuestions) {
+          enableInput();
+          nextQuestion();
+        } else { finishQuiz(); }
+      }, 100);
+    }
+
+    function finishQuiz() {
+      state.isQuizActive = false;
+      clearInterval(state.timer);
+      disableInput();
+      state.endTime = new Date();
+      showResults();
+    }
+
+    /***********************************
+     * UI HELPERS
+     ***********************************/
+    function disableInput() {
+      document.getElementById('userAnswer').disabled = true;
+      document.getElementById('submitBtn').disabled = true;
+    }
+    function enableInput() {
+      document.getElementById('userAnswer').disabled = false;
+      document.getElementById('submitBtn').disabled = false;
+      document.getElementById('userAnswer').focus();
+    }
+    function showResults() {
+      document.getElementById('quizSection').style.display = 'none';
+      document.getElementById('resultsSection').style.display = 'block';
+      const totalTime = ((state.endTime - state.startTime) / 1000).toFixed(2);
+      let correctCount = 0;
+      state.questions.forEach((q, index) => {
+        if (state.userAnswers[index] === q.answer) { correctCount++; }
       });
-      
-      resultsSection.style.display = 'block';
+      const totalQuestions = state.questions.length;
+      const wrongCount = totalQuestions - correctCount;
+      const percentageCorrect = ((correctCount / totalQuestions) * 100).toFixed(2);
+      const avgTimePerOp = (totalTime / totalQuestions).toFixed(2);
+      const score = ((correctCount * 60) / totalTime).toFixed(2);
+      let category = "";
+      let categoryColor = "";
+      if (score <= 30) {
+        category = "Struggling";
+        categoryColor = "#FF6F61";
+      } else if (score <= 60) {
+        category = "Competent";
+        categoryColor = "#42a5f5";
+      } else {
+        category = "Outstanding";
+        categoryColor = "#FFD700";
+      }
+      const finalStatsHTML = `
+        <p><strong>Operation:</strong> ${state.currentOperation}</p>
+        <p><strong>Mode:</strong> ${state.currentMode}</p>
+        <p><strong>Score:</strong> ${score} Operations per minute</p>
+        <p><strong>Average Time per Operation:</strong> ${avgTimePerOp} seconds</p>
+        <p><strong>Performance Status:</strong> <span style="color: ${categoryColor}; font-weight: bold;">${category}</span></p>
+        <p><strong>Correct Answers:</strong> ${correctCount}</p>
+        <p><strong>Incorrect Answers:</strong> ${wrongCount}</p>
+        <p><strong>Percentage Correct:</strong> ${percentageCorrect}%</p>
+        <p><strong>Total Time:</strong> ${totalTime} seconds</p>
+      `;
+      document.getElementById('finalStats').innerHTML = finalStatsHTML;
+      const tbody = document.getElementById('resultsBody');
+      tbody.innerHTML = "";
+      state.questions.forEach((q, index) => {
+        const userAnswer = state.userAnswers[index] !== null ? state.userAnswers[index] : 'Not Answered';
+        const isCorrect = state.userAnswers[index] === q.answer;
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${q.question}</td>
+          <td>${q.answer}</td>
+          <td>${userAnswer}</td>
+          <td>${isCorrect ? '✅ Correct' : '❌ Incorrect'}</td>
+        `;
+        row.classList.add(isCorrect ? 'correct-answer' : 'wrong-answer');
+        tbody.appendChild(row);
+      });
     }
 
-    // Submit Answer Handler
-    submitAnswerButton.addEventListener('click', () => {
-      const currentQ = questions[currentQuestion];
-      if(currentQ.op === 'division') {
-        const userQuotient = parseInt(quotientInput.value, 10);
-        const userRemainder = parseInt(remainderInput.value, 10);
-        if(isNaN(userQuotient) || isNaN(userRemainder)) {
-          feedbackText.textContent = 'Please enter valid numbers for quotient and remainder!';
-          return;
-        }
-        if(userQuotient === currentQ.answer.quotient && userRemainder === currentQ.answer.remainder) {
-          feedbackText.textContent = 'Correct!';
-          score++;
-        } else {
-          feedbackText.textContent = `Incorrect. The correct answer is ${currentQ.answer.quotient} with remainder ${currentQ.answer.remainder}.`;
-        }
-        userAnswers.push({ quotient: userQuotient, remainder: userRemainder });
-      } else {
-        const userAns = parseFloat(answerInput.value);
-        if(isNaN(userAns)) {
-          feedbackText.textContent = 'Please enter a valid number!';
-          return;
-        }
-        if(Math.abs(userAns - currentQ.answer) < 0.001) {
-          feedbackText.textContent = 'Correct!';
-          score++;
-        } else {
-          feedbackText.textContent = `Incorrect. The correct answer is ${currentQ.answer}.`;
-        }
-        userAnswers.push(userAns);
-      }
-      currentQuestion++;
-      setTimeout(showQuestion, 1500);
-    });
-
-    // Start Quiz button handler
-    startButton.addEventListener('click', startQuiz);
-
-    // Support Enter key for answer submission
-    answerInput.addEventListener('keyup', function(event) {
-      if(event.key === 'Enter') {
-        submitAnswerButton.click();
+    /***********************************
+     * EVENT LISTENERS
+     ***********************************/
+    document.getElementById('userAnswer').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter' && state.isQuizActive) {
+        e.preventDefault();
+        submitAnswer();
       }
     });
-    quotientInput.addEventListener('keyup', function(event) {
-      if(event.key === 'Enter') {
-        remainderInput.focus();
-      }
-    });
-    remainderInput.addEventListener('keyup', function(event) {
-      if(event.key === 'Enter') {
-        submitAnswerButton.click();
-      }
-    });
+    // Initialize theme based on stored preference
+    (function initializeTheme() {
+      const savedTheme = localStorage.getItem('theme') || 'light';
+      document.documentElement.setAttribute('data-bs-theme', savedTheme);
+      document.getElementById('themeToggle').textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+    })();
   </script>
 </body>
 </html>
